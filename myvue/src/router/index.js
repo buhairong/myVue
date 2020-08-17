@@ -1,6 +1,6 @@
 import Vue from "vue";
 //import VueRouter from "vue-router";
-import VueRouter from "../myVue/myRouter";
+import VueRouter from "../myvue/myrouter/router.js";
 import Home from "../views/Home.vue";
 
 // 1. 为什么用 use 方法？ 他做了什么？

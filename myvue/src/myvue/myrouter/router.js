@@ -28,17 +28,20 @@ let myVue
 class VueRouter {
     constructor(options) {
         this.$options = options
+
+        // 响应式数据
+        const initial = window.location.hash.slice(1) || '/'
+        myVue.util.defineReactive(this, 'current', initial)
         
-        this.current = '/'
-
-        // 监听事件
+        // 监听事件        
         window.addEventListener('hashchange', this.onHashChange.bind(this))
+        window.addEventListener('load', this.onHashChange.bind(this))
 
-        myVue
+        
     }
 
     onHashChange() {
-        this.current = window.location.hash.slice(1)
+        this.current = window.location.hash.slice(1) || '/'
     }
 }
 
@@ -49,11 +52,11 @@ VueRouter.install = function(Vue) {
 
     // 1.挂载$router
     Vue.mixin({
-        beforeCreat() {
+        beforeCreate() {
             // 全局混入，将来在组件实例化的时候才执行
             // 此时router实例已经存在了
             // this指的是组件实例
-            if(this.$options.router) {
+            if(this.$options.router) {                
                 // 挂载
                 Vue.prototype.$router = this.$options.router
             }
@@ -89,9 +92,10 @@ VueRouter.install = function(Vue) {
             const current = this.$router.current
 
             const route = routes.find(route => route.path === current)
+            const comp = route ? route.component : null
 
-            // 获取路由表
-            return h('div', 'view')y
+            // // 获取路由表
+            return h(comp)
             
         }
     })
