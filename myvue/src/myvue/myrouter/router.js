@@ -23,25 +23,63 @@ spa点击链接不能刷新页面
     router-view
 */
 
+import routerView from './router-view'
+import routerLink from './router-link'
+
 let myVue
 
 class VueRouter {
     constructor(options) {
         this.$options = options
 
-        // 响应式数据
-        const initial = window.location.hash.slice(1) || '/'
-        myVue.util.defineReactive(this, 'current', initial)
+         // 响应式数据
+        //const initial = window.location.hash.slice(1) || '/'
+        // myVue.util.defineReactive(this, 'current', initial)
+
+        this.current = window.location.hash.slice(1) || '/'
+        myVue.util.defineReactive(this, 'matched', [])
+
+        // match 方法可以递归遍历路由表，获得匹配关系数组
+        this.match()
         
         // 监听事件        
         window.addEventListener('hashchange', this.onHashChange.bind(this))
         window.addEventListener('load', this.onHashChange.bind(this))
 
-        
+        // 缓存路由映射关系
+        // 缓存path和route映射关系
+        // this.routeMap = {}
+        // this.$options.routes.forEach(route => {
+        //     this.routeMap[route.path] = route
+        // })
     }
 
     onHashChange() {
         this.current = window.location.hash.slice(1) || '/'
+        this.matched = []
+        this.match()
+    }
+
+    match(routes) {
+        routes = routes || this.$options.routes
+
+        // 递归遍历
+        for (const route of routes) {
+            if(route.path === '/' && this.current === '/') {
+                this.matched.push(route)
+                return
+            }
+
+            //   /about/info
+            if(route.path !== '/' && this.current.indexOf(route.path) !== -1) {
+                this.matched.push(route)
+
+                if(route.children) {
+                    this.match(route.children)
+                }
+                return
+            }
+        }
     }
 }
 
@@ -51,54 +89,23 @@ VueRouter.install = function(Vue) {
     myVue = Vue
 
     // 1.挂载$router
-    Vue.mixin({
+    myVue.mixin({
         beforeCreate() {
             // 全局混入，将来在组件实例化的时候才执行
             // 此时router实例已经存在了
             // this指的是组件实例
             if(this.$options.router) {                
                 // 挂载
-                Vue.prototype.$router = this.$options.router
+                myVue.prototype.$router = this.$options.router
             }
         }
     })
 
     // 2.实现两个全局组件
-    Vue.component('router-link', {
-        props: {
-            to: {
-                type: String,
-                required: true
-            }
-        },
-
-        // h 是 createElement 函数
-        render(h) {
-            // <a href="#/xxx"></a>
-            // h(tag, props, children)
-            return h('a', {
-                attrs: {
-                    href: '#'+this.to
-                }
-            }, this.$slots.default)
-        }
-    })
+    Vue.component('router-link', routerLink)
 
     // router-view是一个容器
-    Vue.component('router-view', {
-        render(h) {
-            // 获取路由器实例
-            const routes = this.$router.$options.routes
-            const current = this.$router.current
-
-            const route = routes.find(route => route.path === current)
-            const comp = route ? route.component : null
-
-            // // 获取路由表
-            return h(comp)
-            
-        }
-    })
+    Vue.component('router-view', routerView)
 }
 
 export default VueRouter
