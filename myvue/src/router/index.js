@@ -13,7 +13,13 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home
+    component: Home,
+    beforeEnter(from, to, next) {
+      console.log(`beforeEnter from ${from} to ${to}`)
+      setTimeout(() => {
+        next()
+      }, 2000)
+    }
   },
   {
     path: "/about",

@@ -10,6 +10,7 @@ export default {
     render(h) {
         // <a href="#/xxx"></a>
         // h(tag, props, children)
+        // h 三个参数  组件名、参数、子元素
         return h('a', {
             attrs: {
                 href: '#'+this.to

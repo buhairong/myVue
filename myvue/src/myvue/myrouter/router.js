@@ -54,10 +54,41 @@ class VueRouter {
         // })
     }
 
-    onHashChange() {
-        this.current = window.location.hash.slice(1) || '/'
+    onHashChange(e) {
+        let hash = window.location.hash.slice(1) || '/'
         this.matched = []
-        this.match()
+        
+        this.$options.routes.forEach(item => {
+            if(item.path === hash) {
+                if(item.beforeEnter) {
+                    let from, to
+                    if(e.newURL) {
+                        from = e.oldURL.split('#')[1]
+                        to = e.newURL.split('#')[1]
+                    }else {
+                        // 第一次加载
+                        from = ''
+                        to = hash
+                    }
+
+                    item.beforeEnter(from, to, () => {
+                        console.log('hash', hash)
+                        this.current = hash
+                        this.match()
+                    })
+                }else {
+                    this.current = hash
+                    this.match()
+                }                
+            }
+        })
+    }
+
+    push(url) {
+        // hash 模式直接复制
+        location.hash = url
+
+        // history 模式请使用 pushState
     }
 
     match(routes) {
