@@ -15,7 +15,6 @@ const routes = [
     name: "Home",
     component: Home,
     beforeEnter(from, to, next) {
-      console.log(`beforeEnter from ${from} to ${to}`)
       setTimeout(() => {
         next()
       }, 2000)

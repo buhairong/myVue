@@ -31,6 +31,8 @@ let myVue
 class VueRouter {
     constructor(options) {
         this.$options = options
+        this.mode = options.mode || 'hash'
+        console.log(this.mode)
 
          // 响应式数据
         //const initial = window.location.hash.slice(1) || '/'
@@ -42,9 +44,17 @@ class VueRouter {
         // match 方法可以递归遍历路由表，获得匹配关系数组
         this.match()
         
-        // 监听事件        
-        window.addEventListener('hashchange', this.onHashChange.bind(this))
-        window.addEventListener('load', this.onHashChange.bind(this))
+        // 监听事件
+        if(this.mode === 'hash') {
+            // hash 模式
+            window.addEventListener('hashchange', this.onHashChange.bind(this))
+            window.addEventListener('load', this.onHashChange.bind(this))
+        }else if(this.mode === 'history') {
+            // history 模式
+            window.addEventListener('popstate', this.onHistoryChange.bind(this))
+            window.addEventListener('load', this.onHistoryChange.bind(this))
+        }
+        
 
         // 缓存路由映射关系
         // 缓存path和route映射关系
@@ -54,7 +64,14 @@ class VueRouter {
         // })
     }
 
+    onHistoryChange(e) {
+        console.log(e)
+        this.current = window.location.hash.slice(1)
+        window.history.pushState("", "", this.current)
+    }
+
     onHashChange(e) {
+        console.log(e)
         let hash = window.location.hash.slice(1) || '/'
         this.matched = []
         
